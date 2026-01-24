@@ -5,7 +5,9 @@
 }
 
 html, body {
-    height: 100vh;
+    height: 100%;
+    min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
     overflow: hidden;
 }
 
@@ -13,8 +15,10 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #fff;
     padding: 10px;
+    padding-bottom: 0;
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 .container {
@@ -24,12 +28,13 @@ body {
     background-color: #fff;
     border-radius: 8px;
     padding: 15px;
-    padding-bottom: 100px;
-    height: 100%;
+    padding-bottom: 80px; /* Space for fixed input section */
+    flex: 1;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow-y: auto;
+    min-height: 0;
 }
 
 /* Top Section: List Display Area */
@@ -233,7 +238,7 @@ body {
 
 /* Bottom Section: Input and Action Area */
 .input-section {
-    position: absolute;
+    position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
@@ -241,9 +246,11 @@ body {
     flex-direction: column;
     gap: 10px;
     padding: 15px;
+    padding-bottom: calc(15px + env(safe-area-inset-bottom)); /* Safe area for mobile */
     background-color: #fff;
     border-top: 1px solid #e0e0e0;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 100;
 }
 
 .input-container {
@@ -346,6 +353,15 @@ body {
 
 /* Mobile - Small screens */
 @media (max-width: 767px) {
+    body {
+        padding: 5px;
+    }
+    
+    .container {
+        padding: 10px;
+        padding-bottom: 80px;
+    }
+    
     .button-section {
         justify-content: flex-end;
     }
@@ -353,6 +369,11 @@ body {
     .default-button {
         padding: 6px 12px;
         font-size: 12px;
+    }
+    
+    .input-section {
+        padding: 12px;
+        padding-bottom: calc(12px + env(safe-area-inset-bottom));
     }
     
     .input-container {
@@ -483,14 +504,14 @@ body {
 
 .wheel-pointer {
     position: absolute;
-    top: -10px;
+    bottom: -10px;
     left: 50%;
     transform: translateX(-50%);
     width: 0;
     height: 0;
     border-left: 15px solid transparent;
     border-right: 15px solid transparent;
-    border-bottom: 30px solid #2c2c2c;
+    border-top: 30px solid #2c2c2c;
     z-index: 10;
 }
 
