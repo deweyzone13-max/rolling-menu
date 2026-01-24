@@ -223,6 +223,7 @@ function createSpinningWheel() {
 let isSpinning = false;
 let spinAnimation = null;
 let currentRotation = 0;
+let stopTimeout = null; // Store timeout for result display
 
 function startSpinning() {
     if (isSpinning) return;
@@ -246,7 +247,12 @@ function stopSpinning() {
     
     isSpinning = false;
     stopButton.disabled = true;
-    cancelAnimationFrame(spinAnimation);
+    
+    // Cancel animation frame
+    if (spinAnimation) {
+        cancelAnimationFrame(spinAnimation);
+        spinAnimation = null;
+    }
     
     const totalProbability = menus.reduce((sum, menu) => sum + menu.probability, 0);
     
@@ -264,28 +270,53 @@ function stopSpinning() {
     }
     
     // Calculate the angle where the winning segment should be at the top
-    // Segments start at -90 degrees (top), pointer is at top (0 degrees)
-    // We need to rotate so the winning segment's middle is at the top
+    // Pointer is at top (0 degrees), segments start at -90 degrees (top)
+    // We need to rotate so the winning segment is positioned correctly at the pointer
+    
+    // Calculate cumulative angles for each segment (in original wheel coordinates, starting from -90)
     let cumulativeAngle = -90; // Start from top
     for (let i = 0; i < winningIndex; i++) {
         cumulativeAngle += (menus[i].probability / totalProbability) * 360;
     }
-    // The winning segment's middle should be at the top (0 degrees relative to pointer)
+    
+    // The winning segment's angle range
     const winningSegmentAngle = (menus[winningIndex].probability / totalProbability) * 360;
-    const targetAngle = -cumulativeAngle - (winningSegmentAngle / 2);
+    const segmentStartAngle = cumulativeAngle;
+    const segmentEndAngle = cumulativeAngle + winningSegmentAngle;
+    
+    // We want the pointer (at 0 degrees) to point to somewhere in the winning segment
+    // After rotation, the segment will be at: segmentStartAngle + rotation
+    // We want: 0 degrees (pointer) to be between (segmentStartAngle + rotation) and (segmentEndAngle + rotation)
+    // So: segmentStartAngle + rotation <= 0 <= segmentEndAngle + rotation
+    // Or: -segmentEndAngle <= rotation <= -segmentStartAngle
+    
+    // Choose a random point within the segment for more natural result
+    const randomOffset = Math.random() * winningSegmentAngle;
+    const targetPointInSegment = segmentStartAngle + randomOffset;
+    
+    // We want this point to be at 0 degrees (pointer position) after rotation
+    // So: targetPointInSegment + rotation = 0
+    // Therefore: rotation = -targetPointInSegment
+    const targetAngle = -targetPointInSegment;
     
     // Add multiple full rotations for visual effect
     const extraRotations = 3 + Math.random() * 2; // 3-5 full rotations
-    const finalRotation = currentRotation + (extraRotations * 360) + targetAngle;
+    const finalRotation = (extraRotations * 360) + targetAngle;
     
+    // Reset current rotation for accurate calculation
+    currentRotation = 0;
     spinningWheel.style.transition = 'transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
     spinningWheel.style.transform = `rotate(${finalRotation}deg)`;
     
+    // Update currentRotation to final value for reference
+    currentRotation = finalRotation;
+    
     // Show result after 3 seconds
-    setTimeout(() => {
+    stopTimeout = setTimeout(() => {
         const winner = menus[winningIndex];
         resultText.textContent = `결과 : ${winner.name} 당첨`;
         stopButton.disabled = false;
+        stopTimeout = null;
     }, 3000);
 }
 
@@ -311,11 +342,27 @@ function submitMenus() {
 
 // Close modal
 function closeModal() {
+    // Cancel any ongoing animations
+    if (spinAnimation) {
+        cancelAnimationFrame(spinAnimation);
+        spinAnimation = null;
+    }
+    
+    // Clear any pending timeouts
+    if (stopTimeout) {
+        clearTimeout(stopTimeout);
+        stopTimeout = null;
+    }
+    
+    // Reset spinning state
+    isSpinning = false;
+    currentRotation = 0;
+    
+    // Reset UI
     modalOverlay.classList.remove('show');
     spinningWheel.style.transition = '';
     spinningWheel.style.transform = 'rotate(0deg)';
     resultText.textContent = '';
-    isSpinning = false;
     stopButton.disabled = false;
 }
 

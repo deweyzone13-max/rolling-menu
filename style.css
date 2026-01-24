@@ -483,14 +483,14 @@ body {
 
 .wheel-pointer {
     position: absolute;
-    bottom: -10px;
+    top: -10px;
     left: 50%;
     transform: translateX(-50%);
     width: 0;
     height: 0;
     border-left: 15px solid transparent;
     border-right: 15px solid transparent;
-    border-top: 30px solid #2c2c2c;
+    border-bottom: 30px solid #2c2c2c;
     z-index: 10;
 }
 
