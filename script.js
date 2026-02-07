@@ -33,8 +33,8 @@ function addMenu() {
     }
     
     // Check maximum limit
-    if (menus.length >= 10) {
-        alert('메뉴는 최대 10개까지 추가할 수 있습니다.');
+    if (menus.length >= 100) {
+        alert('메뉴는 최대 100개까지 추가할 수 있습니다.');
         return;
     }
     
